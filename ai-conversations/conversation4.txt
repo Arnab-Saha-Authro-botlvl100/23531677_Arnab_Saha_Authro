@@ -133,3 +133,103 @@ Convert to DataFrame
 Aggregate by day
 
 Plot with matplotlib
+
+
+me: How can I save the plotted graph as a high-resolution PNG or PDF while keeping the design intact?
+ai: You can save a matplotlib plot as a high-resolution PNG or PDF using the savefig() function. You can control the resolution (DPI), figure size, and ensure the design elements (labels, legend, tight layout) stay intact. Here’s how to do it step by step:
+
+Example: Saving a Plot as High-Resolution PNG or PDF
+import matplotlib.pyplot as plt
+import pandas as pd
+
+# Example data
+dates = pd.date_range(start='2025-10-19', periods=7)
+min_temp = [12, 14, 13, 15, 11, 12, 14]
+avg_temp = [18, 20, 19, 21, 17, 18, 20]
+max_temp = [24, 26, 25, 27, 23, 24, 26]
+
+plt.figure(figsize=(10, 5))
+
+plt.plot(dates, min_temp, marker='o', label='Min Temp')
+plt.plot(dates, avg_temp, marker='o', label='Avg Temp')
+plt.plot(dates, max_temp, marker='o', label='Max Temp')
+
+plt.xlabel('Date')
+plt.ylabel('Temperature (°C)')
+plt.title('Daily Temperature Forecast')
+plt.xticks(rotation=45)
+plt.legend()
+plt.tight_layout()  # Keep layout tight
+
+# Save as PNG (high resolution)
+plt.savefig('temperature_plot.png', dpi=300)  # dpi=300 for high resolution
+
+# Save as PDF
+plt.savefig('temperature_plot.pdf')  # PDF preserves vector graphics
+
+plt.show()
+
+Key Points:
+
+dpi (dots per inch): Controls the resolution for raster formats like PNG. Higher DPI = higher quality.
+
+tight_layout(): Ensures labels, titles, and legends do not get cut off.
+
+PDF format: Keeps graphics vector-based, so it can be scaled without losing quality.
+
+Figure size (figsize): Controls the canvas size; important for both PNG and PDF.
+
+me: How do I automatically detect and remove outliers in the temperature data before plotting?
+ai: Detecting and removing outliers in your temperature data before plotting can make your graph more accurate and prevent issues like an infinite y-axis. A common approach is to use statistical methods such as the Z-score or Interquartile Range (IQR). Here's a step-by-step guide using Python and pandas:
+
+Method 1: Using Z-score
+
+The Z-score measures how many standard deviations a data point is from the mean. Values beyond a threshold (commonly ±3) are considered outliers.
+
+import pandas as pd
+import numpy as np
+
+# Example temperature data
+data = pd.DataFrame({
+    'temperature': [12, 14, 13, 150, 15, 11, 12, 14]  # 150 is an outlier
+})
+
+# Calculate Z-scores
+data['z_score'] = (data['temperature'] - data['temperature'].mean()) / data['temperature'].std()
+
+# Keep only values with Z-score between -3 and 3
+clean_data = data[np.abs(data['z_score']) < 3]
+
+print(clean_data)
+
+Method 2: Using Interquartile Range (IQR)
+
+IQR is the difference between the 75th percentile (Q3) and the 25th percentile (Q1). Values outside Q1 - 1.5*IQR and Q3 + 1.5*IQR are considered outliers.
+
+# Calculate Q1, Q3, and IQR
+Q1 = data['temperature'].quantile(0.25)
+Q3 = data['temperature'].quantile(0.75)
+IQR = Q3 - Q1
+
+# Filter out outliers
+clean_data = data[(data['temperature'] >= Q1 - 1.5*IQR) & (data['temperature'] <= Q3 + 1.5*IQR)]
+
+print(clean_data)
+
+Step 3: Plot the Cleaned Data
+import matplotlib.pyplot as plt
+
+plt.plot(clean_data['temperature'], marker='o')
+plt.xlabel('Index')
+plt.ylabel('Temperature (°C)')
+plt.title('Temperature Data Without Outliers')
+plt.show()
+
+
+✅ Tips:
+
+Z-score works well for data that is roughly normally distributed.
+
+IQR works well for skewed data and is robust against extreme values.
+
+Always inspect your data before removing outliers—you don’t want to remove valid extreme weather readings!
